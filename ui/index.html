@@ -23,7 +23,20 @@
       <label><input type="radio" name="layer" value="hidden"><span>Hidden</span></label>
     </fieldset>
     <button id="reveal" class="reveal" type="button" aria-pressed="false">Reveal hidden world</button>
+    <button id="tour-start" type="button">Guided demo</button>
   </header>
+
+  <aside class="tour" id="tour" hidden aria-live="polite">
+    <div class="tour-text">
+      <strong id="tour-title"></strong>
+      <p id="tour-body"></p>
+    </div>
+    <div class="tour-actions">
+      <button id="tour-back" type="button">Back</button>
+      <button id="tour-next" type="button">Next</button>
+      <button id="tour-exit" type="button">Exit</button>
+    </div>
+  </aside>
 
   <p id="notice" class="notice" hidden></p>
 
@@ -35,6 +48,21 @@
         <canvas id="chart" role="img" aria-label="Line chart of distinct categories found against energy used for each mission"></canvas>
       </figure>
       <div class="feeds" id="feeds"></div>
+    </section>
+    <section class="bench" id="bench" hidden>
+      <div class="bench-head">
+        <h2>Benchmark across worlds</h2>
+        <label class="field">Terrain
+          <select id="bench-terrain"></select>
+        </label>
+        <label class="field">ABYSS against
+          <select id="bench-other"></select>
+        </label>
+      </div>
+      <p class="bench-note" id="bench-note"></p>
+      <div class="forest" id="bench-forest"></div>
+      <div class="table-wrap"><table id="bench-table"></table></div>
+      <p class="bench-note" id="bench-meta"></p>
     </section>
     <p class="provenance" id="provenance"></p>
   </main>

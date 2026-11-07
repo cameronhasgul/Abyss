@@ -52,6 +52,8 @@ const app = {
   layer: "terrain",
   lastFrame: 0,
   loadToken: 0,
+  tourIndex: -1,
+  benchmark: null,
 };
 
 async function getJson(path) {
@@ -245,8 +247,10 @@ function drawMap(pane, mission) {
   } else if (app.layer === "terrain") {
     const [lo, hi] = gridExtent(pane.log.terrain.depth_m);
     legend = `Depth ${Math.round(lo)} to ${Math.round(hi)} m. Lines every ${ISOBATH_STEP_M} m. North is up.`;
+  } else if (pane.timeline.some((s) => s.step.planner_diagnostics?.[app.layer])) {
+    legend = `${LAYER_LABELS[app.layer]}: no data yet. The first survey hasn't finished.`;
   } else {
-    legend = `${LAYER_LABELS[app.layer] || "Layer"}: no data at this point in the mission.`;
+    legend = `${LAYER_LABELS[app.layer] || "Layer"}: this planner has no model, so it logs no map.`;
   }
   pane.el.legend.textContent = legend;
 
@@ -701,6 +705,7 @@ function setRevealButton() {
 async function selectWorld(worldId) {
   const token = (app.loadToken += 1);
   setPlaying(false);
+  exitTour();
   app.worldId = worldId;
   const options = app.entries.filter((e) => e.world_id === worldId);
   $("panes").replaceChildren();
@@ -755,21 +760,229 @@ async function changePlanner(pane, options) {
   render();
 }
 
+function setLayer(layer) {
+  const input = document.querySelector(`input[name="layer"][value="${layer}"]`);
+  if (input.disabled) return;
+  input.checked = true;
+  app.layer = layer;
+}
+
+async function setRevealed(revealed) {
+  if (revealed) await fetchReveals();
+  app.revealed = revealed;
+  setRevealButton();
+  updateLayerControls();
+  if (revealed) setLayer("hidden");
+}
+
 async function toggleReveal() {
   if (!app.panes.length) return;
-  if (!app.revealed) {
-    await fetchReveals();
-    app.revealed = true;
-    setRevealButton();
-    updateLayerControls();
-    document.querySelector('input[name="layer"][value="hidden"]').checked = true;
-    app.layer = "hidden";
-  } else {
-    app.revealed = false;
-    setRevealButton();
-    updateLayerControls();
-  }
+  await setRevealed(!app.revealed);
   render();
+}
+
+// Benchmark ------------------------------------------------------------------
+
+const PLANNER_NAMES = {
+  abyss: "ABYSS",
+  frontier: "Frontier",
+  heuristic: "Heuristic",
+  lawnmower: "Lawnmower",
+  random: "Random",
+  abyss_no_info: "No uncertainty",
+  abyss_no_learning: "No learning",
+};
+const TERRAIN_LABELS = { gebco: "GEBCO Monterey crop", synthetic: "Synthetic (one per seed)" };
+
+function worldLabel(world) {
+  const name = SCENARIO_NAMES[world.scenario] || world.scenario;
+  return world.scenario === "random" ? name : `${name}, signal ${world.rho}`;
+}
+
+function renderBenchmark() {
+  const data = app.benchmark;
+  const terrain = $("bench-terrain").value;
+  const other = $("bench-other").value;
+  const worlds = data.worlds.filter((w) => w.terrain === terrain);
+  const span = Math.max(1, ...worlds.flatMap((w) => {
+    const c = w.abyss_vs[other];
+    return [Math.abs(c.ci95_low), Math.abs(c.ci95_high)];
+  }));
+  const position = (v) => `${50 + (50 * v) / span}%`;
+
+  const rows = worlds.map((world) => {
+    const c = world.abyss_vs[other];
+    const verdict = c.ci95_low > 0 ? "higher" : c.ci95_high < 0 ? "lower" : "unclear";
+    const row = document.createElement("div");
+    row.className = `forest-row ci-${verdict}`;
+    const label = document.createElement("span");
+    label.textContent = worldLabel(world);
+    const track = document.createElement("div");
+    track.className = "forest-track";
+    const zero = document.createElement("i");
+    zero.className = "forest-zero";
+    zero.style.left = "50%";
+    const ci = document.createElement("i");
+    ci.className = "forest-ci";
+    ci.style.left = position(c.ci95_low);
+    ci.style.width = `${(50 * (c.ci95_high - c.ci95_low)) / span}%`;
+    const dot = document.createElement("i");
+    dot.className = "forest-dot";
+    dot.style.left = position(c.mean_difference);
+    track.append(zero, ci, dot);
+    const value = document.createElement("span");
+    value.className = "forest-value";
+    const word = document.createElement("b");
+    word.textContent = { higher: "ABYSS higher", lower: "ABYSS lower", unclear: "No clear difference" }[verdict];
+    const sign = c.mean_difference >= 0 ? "+" : "";
+    value.append(word, ` ${sign}${fmt(c.mean_difference, 2)} [${fmt(c.ci95_low, 2)}, ${fmt(c.ci95_high, 2)}]`);
+    row.append(label, track, value);
+    return row;
+  });
+  $("bench-forest").replaceChildren(...rows);
+  $("bench-note").textContent =
+    `Difference in distinct categories found, ABYSS minus ${PLANNER_NAMES[other]}, on the same ${data.seeds.length} worlds. ` +
+    "Bars show 95% intervals. Zero is the centre line.";
+
+  const planners = Object.keys(PLANNER_NAMES);
+  const head = document.createElement("tr");
+  for (const title of ["Mean categories found", ...planners.map((p) => PLANNER_NAMES[p])]) {
+    const th = document.createElement("th");
+    th.scope = "col";
+    th.textContent = title;
+    head.append(th);
+  }
+  const body = worlds.map((world) => {
+    const tr = document.createElement("tr");
+    const name = document.createElement("td");
+    name.textContent = worldLabel(world);
+    tr.append(name);
+    const best = Math.max(...planners.map((p) => world.planners[p].mean));
+    for (const planner of planners) {
+      const td = document.createElement("td");
+      const mean = world.planners[planner].mean;
+      td.textContent = fmt(mean, 2);
+      if (planner === "abyss") td.classList.add("abyss-col");
+      if (mean === best) td.classList.add("best");
+      tr.append(td);
+    }
+    return tr;
+  });
+  $("bench-table").replaceChildren(head, ...body);
+
+  const safety = data.safety;
+  $("bench-meta").textContent =
+    `${safety.missions} missions, ${safety.safe_returns} safe returns, ${safety.forced_returns} forced returns. ` +
+    `Scored on true labels with ideal perception. Biology is simulated and energy is in abstract units. ` +
+    `ABYSS settings were frozen on separate development seeds. The maximum is ` +
+    `${data.frozen_config.simulation.n_categories} categories, so results near it can't show larger differences. ` +
+    "Intervals are not corrected for multiple comparisons.";
+}
+
+async function loadBenchmark() {
+  const response = await fetch("logs/benchmark.json");
+  if (!response.ok) return; // only appears once a real benchmark has been run
+  app.benchmark = await response.json();
+  const terrains = [...new Set(app.benchmark.worlds.map((w) => w.terrain))];
+  $("bench-terrain").replaceChildren(...terrains.map((t) => new Option(TERRAIN_LABELS[t] || t, t)));
+  const others = Object.keys(app.benchmark.worlds[0].abyss_vs);
+  $("bench-other").replaceChildren(...others.map((p) => new Option(PLANNER_NAMES[p] || p, p)));
+  $("bench-terrain").addEventListener("change", renderBenchmark);
+  $("bench-other").addEventListener("change", renderBenchmark);
+  $("bench").hidden = false;
+  renderBenchmark();
+}
+
+// Guided demo ----------------------------------------------------------------
+
+function abyssPane() {
+  return app.panes.find((p) => p.entry.planner === "abyss") || app.panes[0];
+}
+
+function otherPane() {
+  return app.panes.find((p) => p !== abyssPane()) || app.panes[0];
+}
+
+const TOUR_STAGES = [
+  {
+    title: "Stage 1: Deployment",
+    apply: async () => { await setRevealed(false); setLayer("terrain"); app.energy = 0; },
+    body: () => "Two robots start at the same station on the same terrain, with the same energy. " +
+      "Neither knows where the organisms are. This terrain is real bathymetry; the biology is simulated.",
+  },
+  {
+    title: "Stage 2: First observations",
+    apply: async () => {
+      await setRevealed(false);
+      setLayer("terrain");
+      const first = abyssPane().timeline.find((s) => s.step.new_discoveries.length);
+      app.energy = first ? first.end : 0;
+    },
+    body: () => {
+      const first = abyssPane().timeline.find((s) => s.step.new_discoveries.length);
+      return first
+        ? `ABYSS makes its first discovery at energy ${fmt(first.end)}. Each survey now updates its habitat model. See the survey feed below the map.`
+        : "ABYSS found no organisms in this mission.";
+    },
+  },
+  {
+    title: "Stage 3: Behaviour emerges",
+    apply: async () => {
+      await setRevealed(false);
+      setLayer("predicted_richness");
+      const line = abyssPane().timeline;
+      app.energy = line[Math.min(5, line.length - 2)].start + 0.01;
+    },
+    body: () => {
+      const line = abyssPane().timeline;
+      const terms = line[Math.min(5, line.length - 2)].step.planner_diagnostics?.target_utility;
+      const numbers = terms
+        ? ` For this target: predicted richness ${fmt(terms.expected_richness, 2)}, information gain ${fmt(terms.information_gain, 2)}, ` +
+          `coverage ${fmt(terms.coverage, 2)}, energy ${fmt(terms.energy_cost, 2)}.`
+        : "";
+      return "This map is what ABYSS currently believes. Its next target comes from a single formula: " +
+        `predicted richness, uncertainty and coverage, per unit of energy.${numbers} No discovery triggers a scripted route.`;
+    },
+  },
+  {
+    title: "Stage 4: Mission complete",
+    apply: async () => { await setRevealed(false); setLayer("terrain"); app.energy = app.maxEnergy; },
+    body: () => {
+      const safe = app.panes.every((p) => p.log.outcome.safe_return);
+      const counts = app.panes.map((p) => `${p.entry.label} found ${p.log.outcome.distinct_categories}`).join(", ");
+      return `${counts}. ${safe ? "Both returned home within budget." : "Check the return status."} One world can't settle anything, whichever planner did better.`;
+    },
+  },
+  {
+    title: "Stage 5: The hidden world",
+    apply: async () => {
+      await setRevealed(true);
+      app.energy = app.maxEnergy;
+      $("bench").scrollIntoView({ behavior: "smooth", block: "start" });
+    },
+    body: () => (app.benchmark
+      ? "The map now shows the simulator's hidden richness. The benchmark compares the planners across many worlds, including those where ABYSS has no advantage."
+      : "The map now shows the simulator's hidden richness, which the robots never saw."),
+  },
+];
+
+async function showTourStage(index) {
+  app.tourIndex = index;
+  setPlaying(false);
+  const stage = TOUR_STAGES[index];
+  await stage.apply();
+  $("tour").hidden = false;
+  $("tour-title").textContent = stage.title;
+  $("tour-body").textContent = stage.body();
+  $("tour-back").disabled = index === 0;
+  $("tour-next").disabled = index === TOUR_STAGES.length - 1;
+  if (index < TOUR_STAGES.length - 1) window.scrollTo({ top: 0, behavior: "smooth" });
+  render();
+}
+
+function exitTour() {
+  app.tourIndex = -1;
+  $("tour").hidden = true;
 }
 
 function bindControls() {
@@ -783,6 +996,11 @@ function bindControls() {
     render();
   });
   $("reveal").addEventListener("click", () => toggleReveal().catch((e) => showNotice(e.message, true)));
+  const tourStep = (index) => showTourStage(index).catch((e) => showNotice(e.message, true));
+  $("tour-start").addEventListener("click", () => { if (app.panes.length) tourStep(0); });
+  $("tour-back").addEventListener("click", () => tourStep(app.tourIndex - 1));
+  $("tour-next").addEventListener("click", () => tourStep(app.tourIndex + 1));
+  $("tour-exit").addEventListener("click", exitTour);
   $("layers").addEventListener("change", (event) => {
     app.layer = event.target.value;
     render();
@@ -816,6 +1034,7 @@ async function init() {
     select.append(option);
   }
   await selectWorld(select.value);
+  await loadBenchmark();
 }
 
 init().catch((error) => showNotice(error.message, true));
