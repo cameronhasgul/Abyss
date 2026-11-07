@@ -2,9 +2,9 @@
 
     python -m scripts.build_ui_logs
 
-Every registered planner runs on the MVP worlds. While only one planner is registered,
-it also gets a second run with a different planner seed, so the side-by-side view has
-a genuine second mission on the same world.
+Runs each planner listed below on one world of each type. The first planner listed
+fills the left panel and the second fills the right. The seed is fixed in advance and
+is not chosen by outcome.
 """
 
 from __future__ import annotations
@@ -16,33 +16,27 @@ from pathlib import Path
 
 from abyss.config import load_config
 from abyss.planners import PLANNERS
-from abyss.run_mission import planner_seed_for, run_mission, validate_mission_log
+from abyss.run_mission import run_mission, validate_mission_log
 
-SCENARIOS = ("ridge", "reversed", "random")
-RHO = {"ridge": 1.0, "reversed": 1.0, "random": 0.0}
-SECOND_RUN_OFFSET = 1000
+SCENARIOS = {"ridge": 0.5, "reversed": 0.5, "clustered": 1.0, "nonlinear": 1.0, "random": 0.0}
+UI_PLANNERS = ("frontier", "abyss", "lawnmower", "heuristic", "random")
+LABELS = {"abyss": "ABYSS"}
 
 
 def build(config_path: str, out_dir: Path, seed: int) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     for old in out_dir.glob("*.json"):
-        old.unlink()
+        if old.name != "benchmark.json":
+            old.unlink()
 
     base = load_config(config_path)
     entries = []
-    for scenario in SCENARIOS:
-        config = replace(base, scenario=scenario, rho=RHO[scenario])
-        runs = [(name, planner_seed_for(seed), "") for name in sorted(PLANNERS)]
-        if len(PLANNERS) == 1:
-            name = runs[0][0]
-            runs = [
-                (name, planner_seed_for(seed), " (run 1)"),
-                (name, planner_seed_for(seed + SECOND_RUN_OFFSET), " (run 2)"),
-            ]
-        for name, planner_seed, suffix in runs:
-            log, reveal = run_mission(config, PLANNERS[name](), seed, planner_seed=planner_seed)
+    for scenario, rho in SCENARIOS.items():
+        config = replace(base, scenario=scenario, rho=rho)
+        for name in UI_PLANNERS:
+            log, reveal = run_mission(config, PLANNERS[name](), seed)
             validate_mission_log(log)
-            stem = f"{log['world']['id']}-{name}-p{planner_seed}"
+            stem = f"{log['world']['id']}-{name}"
             (out_dir / f"{stem}.json").write_text(
                 json.dumps(log, separators=(",", ":")), encoding="utf-8"
             )
@@ -56,7 +50,7 @@ def build(config_path: str, out_dir: Path, seed: int) -> dict:
                     "rho": config.rho,
                     "seed": seed,
                     "planner": name,
-                    "label": f"{name.capitalize()}{suffix}",
+                    "label": LABELS.get(name, name.capitalize()),
                     "log": f"logs/{stem}.json",
                     "reveal": f"logs/{stem}.reveal.json",
                 }

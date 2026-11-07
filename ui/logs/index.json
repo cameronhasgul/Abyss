@@ -1,44 +1,244 @@
 {
  "entries": [
   {
-   "world_id": "ridge-rho1-seed0",
+   "world_id": "ridge-rho0.5-seed0",
    "scenario": "ridge",
-   "rho": 1.0,
+   "rho": 0.5,
    "seed": 0,
-   "planner": "random",
-   "label": "Random (run 1)",
-   "log": "logs/ridge-rho1-seed0-random-p3685993406.json",
-   "reveal": "logs/ridge-rho1-seed0-random-p3685993406.reveal.json"
+   "planner": "frontier",
+   "label": "Frontier",
+   "log": "logs/ridge-rho0.5-seed0-frontier.json",
+   "reveal": "logs/ridge-rho0.5-seed0-frontier.reveal.json"
   },
   {
-   "world_id": "ridge-rho1-seed0",
+   "world_id": "ridge-rho0.5-seed0",
    "scenario": "ridge",
-   "rho": 1.0,
+   "rho": 0.5,
    "seed": 0,
-   "planner": "random",
-   "label": "Random (run 2)",
-   "log": "logs/ridge-rho1-seed0-random-p3633331186.json",
-   "reveal": "logs/ridge-rho1-seed0-random-p3633331186.reveal.json"
+   "planner": "abyss",
+   "label": "ABYSS",
+   "log": "logs/ridge-rho0.5-seed0-abyss.json",
+   "reveal": "logs/ridge-rho0.5-seed0-abyss.reveal.json"
   },
   {
-   "world_id": "reversed-rho1-seed0",
-   "scenario": "reversed",
-   "rho": 1.0,
+   "world_id": "ridge-rho0.5-seed0",
+   "scenario": "ridge",
+   "rho": 0.5,
    "seed": 0,
-   "planner": "random",
-   "label": "Random (run 1)",
-   "log": "logs/reversed-rho1-seed0-random-p3685993406.json",
-   "reveal": "logs/reversed-rho1-seed0-random-p3685993406.reveal.json"
+   "planner": "lawnmower",
+   "label": "Lawnmower",
+   "log": "logs/ridge-rho0.5-seed0-lawnmower.json",
+   "reveal": "logs/ridge-rho0.5-seed0-lawnmower.reveal.json"
   },
   {
-   "world_id": "reversed-rho1-seed0",
+   "world_id": "ridge-rho0.5-seed0",
+   "scenario": "ridge",
+   "rho": 0.5,
+   "seed": 0,
+   "planner": "heuristic",
+   "label": "Heuristic",
+   "log": "logs/ridge-rho0.5-seed0-heuristic.json",
+   "reveal": "logs/ridge-rho0.5-seed0-heuristic.reveal.json"
+  },
+  {
+   "world_id": "ridge-rho0.5-seed0",
+   "scenario": "ridge",
+   "rho": 0.5,
+   "seed": 0,
+   "planner": "random",
+   "label": "Random",
+   "log": "logs/ridge-rho0.5-seed0-random.json",
+   "reveal": "logs/ridge-rho0.5-seed0-random.reveal.json"
+  },
+  {
+   "world_id": "reversed-rho0.5-seed0",
    "scenario": "reversed",
+   "rho": 0.5,
+   "seed": 0,
+   "planner": "frontier",
+   "label": "Frontier",
+   "log": "logs/reversed-rho0.5-seed0-frontier.json",
+   "reveal": "logs/reversed-rho0.5-seed0-frontier.reveal.json"
+  },
+  {
+   "world_id": "reversed-rho0.5-seed0",
+   "scenario": "reversed",
+   "rho": 0.5,
+   "seed": 0,
+   "planner": "abyss",
+   "label": "ABYSS",
+   "log": "logs/reversed-rho0.5-seed0-abyss.json",
+   "reveal": "logs/reversed-rho0.5-seed0-abyss.reveal.json"
+  },
+  {
+   "world_id": "reversed-rho0.5-seed0",
+   "scenario": "reversed",
+   "rho": 0.5,
+   "seed": 0,
+   "planner": "lawnmower",
+   "label": "Lawnmower",
+   "log": "logs/reversed-rho0.5-seed0-lawnmower.json",
+   "reveal": "logs/reversed-rho0.5-seed0-lawnmower.reveal.json"
+  },
+  {
+   "world_id": "reversed-rho0.5-seed0",
+   "scenario": "reversed",
+   "rho": 0.5,
+   "seed": 0,
+   "planner": "heuristic",
+   "label": "Heuristic",
+   "log": "logs/reversed-rho0.5-seed0-heuristic.json",
+   "reveal": "logs/reversed-rho0.5-seed0-heuristic.reveal.json"
+  },
+  {
+   "world_id": "reversed-rho0.5-seed0",
+   "scenario": "reversed",
+   "rho": 0.5,
+   "seed": 0,
+   "planner": "random",
+   "label": "Random",
+   "log": "logs/reversed-rho0.5-seed0-random.json",
+   "reveal": "logs/reversed-rho0.5-seed0-random.reveal.json"
+  },
+  {
+   "world_id": "clustered-rho1-seed0",
+   "scenario": "clustered",
+   "rho": 1.0,
+   "seed": 0,
+   "planner": "frontier",
+   "label": "Frontier",
+   "log": "logs/clustered-rho1-seed0-frontier.json",
+   "reveal": "logs/clustered-rho1-seed0-frontier.reveal.json"
+  },
+  {
+   "world_id": "clustered-rho1-seed0",
+   "scenario": "clustered",
+   "rho": 1.0,
+   "seed": 0,
+   "planner": "abyss",
+   "label": "ABYSS",
+   "log": "logs/clustered-rho1-seed0-abyss.json",
+   "reveal": "logs/clustered-rho1-seed0-abyss.reveal.json"
+  },
+  {
+   "world_id": "clustered-rho1-seed0",
+   "scenario": "clustered",
+   "rho": 1.0,
+   "seed": 0,
+   "planner": "lawnmower",
+   "label": "Lawnmower",
+   "log": "logs/clustered-rho1-seed0-lawnmower.json",
+   "reveal": "logs/clustered-rho1-seed0-lawnmower.reveal.json"
+  },
+  {
+   "world_id": "clustered-rho1-seed0",
+   "scenario": "clustered",
+   "rho": 1.0,
+   "seed": 0,
+   "planner": "heuristic",
+   "label": "Heuristic",
+   "log": "logs/clustered-rho1-seed0-heuristic.json",
+   "reveal": "logs/clustered-rho1-seed0-heuristic.reveal.json"
+  },
+  {
+   "world_id": "clustered-rho1-seed0",
+   "scenario": "clustered",
    "rho": 1.0,
    "seed": 0,
    "planner": "random",
-   "label": "Random (run 2)",
-   "log": "logs/reversed-rho1-seed0-random-p3633331186.json",
-   "reveal": "logs/reversed-rho1-seed0-random-p3633331186.reveal.json"
+   "label": "Random",
+   "log": "logs/clustered-rho1-seed0-random.json",
+   "reveal": "logs/clustered-rho1-seed0-random.reveal.json"
+  },
+  {
+   "world_id": "nonlinear-rho1-seed0",
+   "scenario": "nonlinear",
+   "rho": 1.0,
+   "seed": 0,
+   "planner": "frontier",
+   "label": "Frontier",
+   "log": "logs/nonlinear-rho1-seed0-frontier.json",
+   "reveal": "logs/nonlinear-rho1-seed0-frontier.reveal.json"
+  },
+  {
+   "world_id": "nonlinear-rho1-seed0",
+   "scenario": "nonlinear",
+   "rho": 1.0,
+   "seed": 0,
+   "planner": "abyss",
+   "label": "ABYSS",
+   "log": "logs/nonlinear-rho1-seed0-abyss.json",
+   "reveal": "logs/nonlinear-rho1-seed0-abyss.reveal.json"
+  },
+  {
+   "world_id": "nonlinear-rho1-seed0",
+   "scenario": "nonlinear",
+   "rho": 1.0,
+   "seed": 0,
+   "planner": "lawnmower",
+   "label": "Lawnmower",
+   "log": "logs/nonlinear-rho1-seed0-lawnmower.json",
+   "reveal": "logs/nonlinear-rho1-seed0-lawnmower.reveal.json"
+  },
+  {
+   "world_id": "nonlinear-rho1-seed0",
+   "scenario": "nonlinear",
+   "rho": 1.0,
+   "seed": 0,
+   "planner": "heuristic",
+   "label": "Heuristic",
+   "log": "logs/nonlinear-rho1-seed0-heuristic.json",
+   "reveal": "logs/nonlinear-rho1-seed0-heuristic.reveal.json"
+  },
+  {
+   "world_id": "nonlinear-rho1-seed0",
+   "scenario": "nonlinear",
+   "rho": 1.0,
+   "seed": 0,
+   "planner": "random",
+   "label": "Random",
+   "log": "logs/nonlinear-rho1-seed0-random.json",
+   "reveal": "logs/nonlinear-rho1-seed0-random.reveal.json"
+  },
+  {
+   "world_id": "random-rho0-seed0",
+   "scenario": "random",
+   "rho": 0.0,
+   "seed": 0,
+   "planner": "frontier",
+   "label": "Frontier",
+   "log": "logs/random-rho0-seed0-frontier.json",
+   "reveal": "logs/random-rho0-seed0-frontier.reveal.json"
+  },
+  {
+   "world_id": "random-rho0-seed0",
+   "scenario": "random",
+   "rho": 0.0,
+   "seed": 0,
+   "planner": "abyss",
+   "label": "ABYSS",
+   "log": "logs/random-rho0-seed0-abyss.json",
+   "reveal": "logs/random-rho0-seed0-abyss.reveal.json"
+  },
+  {
+   "world_id": "random-rho0-seed0",
+   "scenario": "random",
+   "rho": 0.0,
+   "seed": 0,
+   "planner": "lawnmower",
+   "label": "Lawnmower",
+   "log": "logs/random-rho0-seed0-lawnmower.json",
+   "reveal": "logs/random-rho0-seed0-lawnmower.reveal.json"
+  },
+  {
+   "world_id": "random-rho0-seed0",
+   "scenario": "random",
+   "rho": 0.0,
+   "seed": 0,
+   "planner": "heuristic",
+   "label": "Heuristic",
+   "log": "logs/random-rho0-seed0-heuristic.json",
+   "reveal": "logs/random-rho0-seed0-heuristic.reveal.json"
   },
   {
    "world_id": "random-rho0-seed0",
@@ -46,19 +246,9 @@
    "rho": 0.0,
    "seed": 0,
    "planner": "random",
-   "label": "Random (run 1)",
-   "log": "logs/random-rho0-seed0-random-p3685993406.json",
-   "reveal": "logs/random-rho0-seed0-random-p3685993406.reveal.json"
-  },
-  {
-   "world_id": "random-rho0-seed0",
-   "scenario": "random",
-   "rho": 0.0,
-   "seed": 0,
-   "planner": "random",
-   "label": "Random (run 2)",
-   "log": "logs/random-rho0-seed0-random-p3633331186.json",
-   "reveal": "logs/random-rho0-seed0-random-p3633331186.reveal.json"
+   "label": "Random",
+   "log": "logs/random-rho0-seed0-random.json",
+   "reveal": "logs/random-rho0-seed0-random.reveal.json"
   }
  ]
 }

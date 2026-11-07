@@ -23,6 +23,10 @@ class Planner(ABC):
     def observe(self, observation: Observation) -> None:
         """Receive each new survey result. Learning planners update here."""
 
+    def describe(self) -> dict:
+        """Settings in effect, recorded in the mission log."""
+        return {}
+
     def diagnostics(self) -> dict:
         """Optional per-step log data: predicted maps, uncertainty, utility terms."""
         return {}

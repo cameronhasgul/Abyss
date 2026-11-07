@@ -168,7 +168,11 @@ def run_mission(
             "rho": config.rho,
             "seed": seed,
         },
-        "planner": {"name": planner.name, "seed": planner_seed, "config": planner_config},
+        "planner": {
+            "name": planner.name,
+            "seed": planner_seed,
+            "config": {**planner_config, **planner.describe()},
+        },
         "energy": {
             "budget": config.energy_budget,
             "survey_cost": config.survey_cost,
